@@ -621,10 +621,10 @@
   // === دالة تجهيز قائمة الأصوات ===
   function populateVoices() {
     const s = document.getElementById('voice-select');
-    if (!s) return; // حماية للعنصر
+    if (!s) return; 
     
     let availableVoices = window.speechSynthesis.getVoices();
-    voices = availableVoices.filter(v => v.lang.toLowerCase().includes('ar'));
+    voices = availableVoices.filter(v => v.lang.toLowerCase().startsWith('ar'));
 
     if (voices.length > 0) {
       const savedVoice = localStorage.getItem('baloot_voice');
