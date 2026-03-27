@@ -681,11 +681,13 @@
   }
 
   // === نهاية قسم: أكواد الأرشيف ===
-  // === بداية دالة: تجهيز قائمة أصوات القارئ الناطق (نسخة محسنة) ===
+  // ==========================================
+  // دوال محرك الصوت (القارئ الناطق)
+  // ==========================================
+
+  // دالة: تجهيز قائمة أصوات القارئ الناطق
   function populateVoices() {
-    // جلب الأصوات المتاحة في النظام
     let availableVoices = window.speechSynthesis.getVoices();
-    
     // فلترة الأصوات العربية فقط
     voices = availableVoices.filter(v => v.lang.includes('ar'));
 
@@ -693,34 +695,44 @@
     
     if (voices.length > 0) {
       s.innerHTML = voices.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
-      
-      // استعادة الصوت المحفوظ سابقاً إذا وجد
       const savedVoice = localStorage.getItem('baloot_voice');
       if (savedVoice) {
         s.value = savedVoice;
       }
     } else {
-      // في حال لم تتوفر أصوات عربية بعد، نضع رسالة تنبيه داخل القائمة
-      s.innerHTML = '<option value="">لا توجد أصوات عربية متاحة</option>';
+      s.innerHTML = '<option value="">لا توجد أصوات عربية (اضغط للتحديث)</option>';
     }
   }
 
-  // التأكد من عمل الدالة عند تغير حالة المحرك الصوتي في المتصفح
+  // ربط الدالة بحدث تغيير الأصوات وبدء التشغيل
   if ('speechSynthesis' in window) {
     window.speechSynthesis.onvoiceschanged = populateVoices;
-    // محاولة التشغيل فوراً أيضاً
     populateVoices();
+    // إضافة مستمع لحدث الضغط على القائمة لتحديثها يدوياً لو كانت فارغة
+    document.getElementById('voice-select').addEventListener('mousedown', populateVoices);
   }
 
-
-  // === بداية دالة: حفظ صوت القارئ المختار ===
+  // دالة: حفظ صوت القارئ المختار في الذاكرة
   function saveVoice() { 
     localStorage.setItem('baloot_voice', document.getElementById('voice-select').value); 
   }
 
-    // === بداية دالة: نطق النتيجة بالصوت ===
+  // دالة: نطق النتيجة بالصوت (لنا/لهم) مع تأخير بسيط لمنع تعليق أندرويد
   function speakScore() {
-    window.speechSynthesis.cancel(); // إيقاف أي صوت سابق أولاً لضمان عدم التداخل
+    window.speechSynthesis.cancel(); // إيقاف أي صوت سابق
+    
+    setTimeout(() => {
+      const text = `لنا ${totalUs}، لهم ${totalThem}`;
+      const u = new SpeechSynthesisUtterance(text);
+      // البحث عن الصوت المختار
+      const selectedVoiceName = document.getElementById('voice-select').value;
+      const v = voices.find(v => v.name === selectedVoiceName);
+      
+      if(v) u.voice = v; 
+      u.lang = 'ar-SA'; // إجبار اللغة العربية
+      window.speechSynthesis.speak(u);
+    }, 50);
+  }
     
     // إعطاء محرك أندرويد 50 جزء من الثانية قبل إرسال الأمر الجديد لمنع التعليق
     setTimeout(() => {
