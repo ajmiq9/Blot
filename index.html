@@ -681,14 +681,37 @@
   }
 
   // === نهاية قسم: أكواد الأرشيف ===
-
-  // === بداية دالة: تجهيز قائمة أصوات القارئ الناطق ===
+  // === بداية دالة: تجهيز قائمة أصوات القارئ الناطق (نسخة محسنة) ===
   function populateVoices() {
-    voices = window.speechSynthesis.getVoices().filter(v => v.lang.includes('ar'));
+    // جلب الأصوات المتاحة في النظام
+    let availableVoices = window.speechSynthesis.getVoices();
+    
+    // فلترة الأصوات العربية فقط
+    voices = availableVoices.filter(v => v.lang.includes('ar'));
+
     const s = document.getElementById('voice-select');
-    s.innerHTML = voices.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
-    s.value = localStorage.getItem('baloot_voice') || "";
+    
+    if (voices.length > 0) {
+      s.innerHTML = voices.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+      
+      // استعادة الصوت المحفوظ سابقاً إذا وجد
+      const savedVoice = localStorage.getItem('baloot_voice');
+      if (savedVoice) {
+        s.value = savedVoice;
+      }
+    } else {
+      // في حال لم تتوفر أصوات عربية بعد، نضع رسالة تنبيه داخل القائمة
+      s.innerHTML = '<option value="">لا توجد أصوات عربية متاحة</option>';
+    }
   }
+
+  // التأكد من عمل الدالة عند تغير حالة المحرك الصوتي في المتصفح
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = populateVoices;
+    // محاولة التشغيل فوراً أيضاً
+    populateVoices();
+  }
+
 
   // === بداية دالة: حفظ صوت القارئ المختار ===
   function saveVoice() { 
