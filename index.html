@@ -364,16 +364,27 @@
 
   // === بداية دالة: تحميل الإعدادات المحفوظة ===
   function loadSettings() {
+    // 1. تحميل المظهر (فاتح/داكن)
     if(localStorage.getItem('baloot_theme') === 'light') document.body.classList.add('light-theme');
+    
+    // 2. تحميل الألوان المفضلة للفريقين
     const c = JSON.parse(localStorage.getItem('baloot_colors') || '{"us":"#4fffb0","them":"#ff6b8a"}');
     setThemeColors(c.us, c.them);
     
+    // 3. تحميل إعداد صوت الفوز/الخسارة المختار
     const savedSound = localStorage.getItem('baloot_sound_effect');
     if(savedSound) { document.getElementById('sound-select').value = savedSound; }
 
+    // 4. تجهيز محرك الصوت والقائمة المنسدلة
     if ('speechSynthesis' in window) {
       window.speechSynthesis.onvoiceschanged = populateVoices;
       populateVoices();
+      
+      // ربط القائمة بحيث تحدث نفسها "فقط" عند الضغط عليها (حل نظيف وآمن)
+      const voiceSelect = document.getElementById('voice-select');
+      if(voiceSelect) {
+        voiceSelect.addEventListener('mousedown', populateVoices);
+      }
     }
   }
 
@@ -682,18 +693,20 @@
 
   // === نهاية قسم: أكواد الأرشيف ===
   // ==========================================
-  // دوال محرك الصوت (القارئ الناطق)
   // ==========================================
   // دوال محرك الصوت (القارئ الناطق)
   // ==========================================
 
   // دالة: تجهيز قائمة أصوات القارئ الناطق
   function populateVoices() {
+    if (!('speechSynthesis' in window)) return;
+    
     let availableVoices = window.speechSynthesis.getVoices();
     // فلترة الأصوات العربية فقط
-    voices = availableVoices.filter(v => v.lang.includes('ar'));
+    voices = availableVoices.filter(v => v.lang.toLowerCase().includes('ar'));
 
     const s = document.getElementById('voice-select');
+    if (!s) return; // حماية في حال لم يتم تحميل العنصر بعد
     
     if (voices.length > 0) {
       s.innerHTML = voices.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
@@ -706,35 +719,33 @@
     }
   }
 
-  // ربط الدالة بحدث تغيير الأصوات وبدء التشغيل
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = populateVoices;
-    populateVoices();
-    // إضافة مستمع لحدث الضغط على القائمة لتحديثها يدوياً لو كانت فارغة
-    document.getElementById('voice-select').addEventListener('mousedown', populateVoices);
-  }
-
   // دالة: حفظ صوت القارئ المختار في الذاكرة
   function saveVoice() { 
     localStorage.setItem('baloot_voice', document.getElementById('voice-select').value); 
   }
 
-  // دالة: نطق النتيجة بالصوت (لنا/لهم) مع تأخير بسيط لمنع تعليق أندرويد
+  // دالة: نطق النتيجة بالصوت (لنا/لهم)
   function speakScore() {
+    if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel(); // إيقاف أي صوت سابق
     
     setTimeout(() => {
       const text = `لنا ${totalUs}، لهم ${totalThem}`;
       const u = new SpeechSynthesisUtterance(text);
-      // البحث عن الصوت المختار
       const selectedVoiceName = document.getElementById('voice-select').value;
       const v = voices.find(v => v.name === selectedVoiceName);
       
       if(v) u.voice = v; 
-      u.lang = 'ar-SA'; // إجبار اللغة العربية
+      u.lang = 'ar-SA'; 
       window.speechSynthesis.speak(u);
     }, 50);
   }
+
+  // تفعيل مستمعات الأحداث الخاصة بالصوت (توضع داخل window.onload أو استدعاء منفصل)
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = populateVoices;
+  }
+
 
     // إعطاء محرك أندرويد 50 جزء من الثانية قبل إرسال الأمر الجديد لمنع التعليق
     setTimeout(() => {
