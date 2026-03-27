@@ -100,7 +100,7 @@
   .spinner { width: 45px; height: 45px; border: 4px solid var(--surface2); border-top-color: var(--us-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
   @keyframes spin { to { transform: rotate(360deg); } }  
 
-  /* --- النوافذ المنبثقة (إعدادات، تعديل، فوز) --- */
+  /* --- النوافذ المنبثقة --- */
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
   .modal-content { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 380px; max-height: 90vh; overflow-y: auto; }
   .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
@@ -125,9 +125,6 @@
   .winner-score { font-size: 1.4rem; margin-bottom: 20px; }
   .btn-new-game { background: linear-gradient(135deg, var(--us-color), var(--them-color)); color: #fff; }
   .btn-back { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); width: 100%; padding: 10px; border-radius: 8px; margin-top: 10px; cursor: pointer; }
-
-  /* --- تنظيف التوسيط داخل نافذة الفوز --- */
-  .winner-modal-content { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; position: relative; z-index: 200; }
 
   /* --- تنسيقات الأرشيف والحفظ الجديدة --- */
   .text-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-family: 'Tajawal'; margin-bottom: 10px; font-size: 0.9rem; outline: none; }
@@ -233,7 +230,12 @@
         </select>
       </div>
 
-      <div class="setting-group"><label>صوت القارئ (الناطق):</label><select id="voice-select" onchange="saveVoice()" style="width:100%;padding:8px;border-radius:8px;background:var(--surface2);color:var(--text);border:1px solid var(--border);font-family:'Tajawal'"></select></div>
+      <div class="setting-group">
+        <label>صوت القارئ (الناطق):</label>
+        <select id="voice-select" onchange="saveVoice()" style="width:100%;padding:8px;border-radius:8px;background:var(--surface2);color:var(--text);border:1px solid var(--border);font-family:'Tajawal'">
+          <option value="">جاري تجهيز الأصوات...</option>
+        </select>
+      </div>
       <div class="setting-group" style="display:flex;justify-content:space-between;align-items:center"><label>منع إقفال الشاشة:</label><input type="checkbox" id="wake-lock-toggle" onchange="toggleWakeLock()"></div>
     </div>
   </div>
@@ -317,22 +319,35 @@
 <script>
   // === بداية قسم: المتغيرات الأساسية ===
   let totalUs = 0, totalThem = 0, history = [], round = 0, voices = [], wakeLock = null;
-  let savedArchive = []; // مصفوفة لحفظ الأرشيف
+  let savedArchive = []; 
   
-  // مصفوفة تحتوي على الأصوات الأربعة المعتمدة
   const effectSounds = [
-    'https://www.myinstants.com/media/sounds/africa-crying-laugh-commercial.mp3', // 0
-    'https://www.myinstants.com/media/sounds/dnlwd-sdy-mrg-mynkhrft.mp3',         // 1
-    'https://www.myinstants.com/media/sounds/-audiotrimmer_9dvaFN0.mp3',          // 2
-    'https://www.myinstants.com/media/sounds/ankara-messi.mp3'                    // 3
+    'https://www.myinstants.com/media/sounds/africa-crying-laugh-commercial.mp3', 
+    'https://www.myinstants.com/media/sounds/dnlwd-sdy-mrg-mynkhrft.mp3',         
+    'https://www.myinstants.com/media/sounds/-audiotrimmer_9dvaFN0.mp3',          
+    'https://www.myinstants.com/media/sounds/ankara-messi.mp3'                    
   ];
-  let currentAudio = null; // متغير لحفظ الصوت الشغال حالياً لإيقافه عند الحاجة
+  let currentAudio = null; 
 
   // === بداية دالة: التشغيل عند التحميل ===
   window.onload = function() {
     loadData();
     loadSettings();
-    loadArchive(); // تحميل الأرشيف عند البداية
+    loadArchive(); 
+    
+    // تفعيل ومراقبة الصوت بأمان تام بعد تحميل الواجهة
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = populateVoices;
+      populateVoices();
+      
+      // التحديث اليدوي المباشر عند الضغط على القائمة في الجوال
+      const voiceSelect = document.getElementById('voice-select');
+      if (voiceSelect) {
+        voiceSelect.addEventListener('mousedown', populateVoices);
+        voiceSelect.addEventListener('touchstart', populateVoices);
+      }
+    }
+
     setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 1500);
   };
 
@@ -342,13 +357,11 @@
     m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
   }
 
-  // === بداية دالة: تبديل المظهر (فاتح/داكن) ===
   function toggleTheme() {
     const isLight = document.body.classList.toggle('light-theme');
     localStorage.setItem('baloot_theme', isLight ? 'light' : 'dark');
   }
 
-  // === بداية دالة: تغيير الألوان ===
   function setThemeColors(us, them, btn) {
     document.documentElement.style.setProperty('--us-color', us);
     document.documentElement.style.setProperty('--them-color', them);
@@ -357,7 +370,6 @@
     if(btn) btn.classList.add('active');
   }
 
- // === بداية دالة: تحميل الإعدادات المحفوظة ===
   function loadSettings() {
     if(localStorage.getItem('baloot_theme') === 'light') document.body.classList.add('light-theme');
     const c = JSON.parse(localStorage.getItem('baloot_colors') || '{"us":"#4fffb0","them":"#ff6b8a"}');
@@ -365,36 +377,45 @@
     
     const savedSound = localStorage.getItem('baloot_sound_effect');
     if(savedSound) { document.getElementById('sound-select').value = savedSound; }
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = populateVoices;
-      populateVoices();
-    }
   }
 
-  // === بداية دالة: منع إقفال الشاشة تلقائياً ===
+  function saveSoundSetting() {
+    localStorage.setItem('baloot_sound_effect', document.getElementById('sound-select').value);
+  }
+
   async function toggleWakeLock() {
     if (document.getElementById('wake-lock-toggle').checked) {
       try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e){}
     } else if(wakeLock) { wakeLock.release(); wakeLock = null; }
   }
 
-  // === بداية دالة: تسجيل الأبناط الجديدة ===
+  // === بداية دالة: تسجيل الأبناط الجديدة (تم إضافة إخفاء الكيبورد هنا) ===
   function register() {
-    const us = parseInt(document.getElementById('input-us').value) || 0;
-    const them = parseInt(document.getElementById('input-them').value) || 0;
+    const inputUsElement = document.getElementById('input-us');
+    const inputThemElement = document.getElementById('input-them');
+    
+    const us = parseInt(inputUsElement.value) || 0;
+    const them = parseInt(inputThemElement.value) || 0;
+    
     if (us === 0 && them === 0) return;
+    
     round++;
     totalUs += us; totalThem += them;
     history.push({round, us, them});
-    document.getElementById('input-us').value = '';
-    document.getElementById('input-them').value = '';
+    
+    // تفريغ الحقول
+    inputUsElement.value = '';
+    inputThemElement.value = '';
+    
+    // إخفاء الكيبورد فوراً بعد التسجيل
+    inputUsElement.blur();
+    inputThemElement.blur();
+
     updateUI();
     if (totalUs < 152 && totalThem < 152) { speakScore(); }
     checkWin();
   }
 
-  // === بداية دالة: فحص الفوز وتشغيل الصوت ===
   function checkWin() {
     if (totalUs >= 152 || totalThem >= 152) {
       document.getElementById('input-us').blur();
@@ -430,7 +451,6 @@
     }
   }
 
-  // === بداية دالة: فتح نافذة التعديل لجولة سابقة ===
   function openEditModal(rNum) {
     const data = history.find(h => h.round === rNum);
     document.getElementById('edit-round-id').value = rNum;
@@ -440,7 +460,6 @@
     toggleModal('edit-modal');
   }
 
-  // === بداية دالة: حفظ التعديل وإعادة حساب النتيجة ===
   function saveEdit() {
     const rNum = parseInt(document.getElementById('edit-round-id').value);
     const idx = history.findIndex(h => h.round === rNum);
@@ -454,7 +473,6 @@
     checkWin();
   }
 
-  // === بداية دالة: التراجع عن آخر جولة مسجلة ===
   function undo() {
     if (history.length === 0) return;
     history.pop();
@@ -464,13 +482,11 @@
     updateUI();
   }
 
-  // === بداية دالة: تنبيه تصفير اللعبة بالكامل ===
   function resetGame() {
     if(!confirm("بدء صكة جديدة؟")) return;
     resetAfterWin();
   }
 
-  // === بداية دالة: تصفير المتغيرات وإغلاق النوافذ (بعد الفوز أو يدوياً) ===
   function resetAfterWin() {
     if(currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
     totalUs = 0; totalThem = 0; history = []; round = 0;
@@ -478,7 +494,6 @@
     if(document.getElementById('winner-modal').style.display === 'flex') { toggleModal('winner-modal'); }
   }
 
-  // === بداية دالة: تحديث الواجهة وحفظ البيانات في التخزين المؤقت ===
   function updateUI() {
     document.getElementById('score-us').innerText = totalUs;
     document.getElementById('score-them').innerText = totalThem;
@@ -502,31 +517,24 @@
     localStorage.setItem('baloot_data', JSON.stringify({totalUs, totalThem, history, round}));
   }
 
-  // === بداية دالة: جلب البيانات المحفوظة عند فتح التطبيق ===
   function loadData() {
     const d = JSON.parse(localStorage.getItem('baloot_data') || '{}');
     if(d.history) { totalUs = d.totalUs; totalThem = d.totalThem; history = d.history; round = d.round; updateUI(); }
   }
 
-  // === بداية قسم: أكواد الأرشيف (سجل الصكات المحفوظة) ===
-  
-  // دالة: تحميل الأرشيف من الذاكرة
-  function loadArchive() {
-    savedArchive = JSON.parse(localStorage.getItem('baloot_archive') || '[]');
-  }
+  // === أكواد الأرشيف ===
+  function loadArchive() { savedArchive = JSON.parse(localStorage.getItem('baloot_archive') || '[]'); }
 
-  // دالة: فتح نافذة إدخال بيانات حفظ الصكة
   function openSaveGameModal() {
-    toggleModal('winner-modal'); // إغلاق نافذة الفوز
+    toggleModal('winner-modal');
     document.getElementById('player-us-1').value = '';
     document.getElementById('player-us-2').value = '';
     document.getElementById('player-them-1').value = '';
     document.getElementById('player-them-2').value = '';
     document.getElementById('game-note').value = '';
-    toggleModal('save-game-modal'); // فتح نافذة الإدخال
+    toggleModal('save-game-modal'); 
   }
 
-  // دالة: تأكيد وحفظ الصكة في الأرشيف
   function saveGameToArchive() {
     const pUs1 = document.getElementById('player-us-1').value || 'لاعب 1';
     const pUs2 = document.getElementById('player-us-2').value || 'لاعب 2';
@@ -538,219 +546,133 @@
     const dateStr = now.toLocaleDateString('ar-KW');
     const timeStr = now.toLocaleTimeString('ar-KW', {hour: '2-digit', minute:'2-digit'});
     
-    // بناء كائن الصكة
     const gameRecord = {
-      id: Date.now(),
-      date: dateStr,
-      time: timeStr,
-      scoreUs: totalUs,
-      scoreThem: totalThem,
-      playersUs: `${pUs1} و ${pUs2}`,
-      playersThem: `${pThem1} و ${pThem2}`,
-      note: note,
-      rounds: [...history] // حفظ نسخة من الجولات
+      id: Date.now(), date: dateStr, time: timeStr, scoreUs: totalUs, scoreThem: totalThem,
+      playersUs: `${pUs1} و ${pUs2}`, playersThem: `${pThem1} و ${pThem2}`, note: note, rounds: [...history]
     };
 
     savedArchive.push(gameRecord);
     localStorage.setItem('baloot_archive', JSON.stringify(savedArchive));
     
     toggleModal('save-game-modal');
-    resetAfterWin(); // تصفير اللعبة بعد الحفظ الناجح
+    resetAfterWin();
     alert('تم حفظ الصكة بنجاح في الأرشيف 🗂️');
   }
 
-  // دالة: فتح نافذة الأرشيف وعرض القائمة
   function openArchiveModal() {
-    toggleModal('settings-modal'); // إغلاق الإعدادات
-    
+    toggleModal('settings-modal'); 
     const listContainer = document.getElementById('archive-list-container');
     if(savedArchive.length === 0) {
       listContainer.innerHTML = '<li class="empty-state">لا يوجد صكات محفوظة حالياً</li>';
     } else {
-      // ترتيب الصكات من الأحدث للأقدم
       listContainer.innerHTML = [...savedArchive].reverse().map(game => `
         <li class="archive-item" onclick="viewArchiveDetails(${game.id})">
-          <div class="archive-item-header">
-            <span>📅 ${game.date}</span>
-            <span>⏰ ${game.time}</span>
-          </div>
-          <div class="archive-item-score">
-            <span style="color:var(--us-color)">لنا: ${game.scoreUs}</span> | 
-            <span style="color:var(--them-color)">لهم: ${game.scoreThem}</span>
-          </div>
+          <div class="archive-item-header"><span>📅 ${game.date}</span><span>⏰ ${game.time}</span></div>
+          <div class="archive-item-score"><span style="color:var(--us-color)">لنا: ${game.scoreUs}</span> | <span style="color:var(--them-color)">لهم: ${game.scoreThem}</span></div>
         </li>
       `).join('');
     }
-    
     toggleModal('archive-modal');
   }
 
-  // دالة: عرض تفاصيل صكة محددة
   function viewArchiveDetails(gameId) {
     const game = savedArchive.find(g => g.id === gameId);
     if(!game) return;
-
     document.getElementById('current-archive-id').value = gameId;
     
     let roundsHtml = game.rounds.map(r => `
-      <div class="details-round">
-        <span style="color:var(--them-color)">+${r.them}</span>
-        <span style="color:var(--text-dim)">جولة ${r.round}</span>
-        <span style="color:var(--us-color)">+${r.us}</span>
-      </div>
+      <div class="details-round"><span style="color:var(--them-color)">+${r.them}</span><span style="color:var(--text-dim)">جولة ${r.round}</span><span style="color:var(--us-color)">+${r.us}</span></div>
     `).join('');
 
     const contentHtml = `
-      <div class="details-box">
-        <h4>النشرة النهائية 🏆</h4>
-        <div style="text-align:center; font-size:1.5rem; font-weight:900; margin-bottom:10px;">
-          <span style="color:var(--us-color)">${game.scoreUs}</span> - <span style="color:var(--them-color)">${game.scoreThem}</span>
-        </div>
-        <div><strong>التاريخ:</strong> ${game.date} | <strong>الوقت:</strong> ${game.time}</div>
-      </div>
-      
-      <div class="details-box">
-        <h4>اللاعبين 👥</h4>
-        <div><strong style="color:var(--us-color)">فريق لنا:</strong> ${game.playersUs}</div>
-        <div><strong style="color:var(--them-color)">فريق لهم:</strong> ${game.playersThem}</div>
-      </div>
-
-      <div class="details-box">
-        <h4>تفاصيل الجولات 📝</h4>
-        <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:bold;">
-          <span>لهم</span><span>الرقم</span><span>لنا</span>
-        </div>
-        ${roundsHtml}
-      </div>
-
-      <div class="details-box">
-        <h4>الملاحظات 📌</h4>
-        <div>${game.note}</div>
-      </div>
+      <div class="details-box"><h4>النشرة النهائية 🏆</h4><div style="text-align:center; font-size:1.5rem; font-weight:900; margin-bottom:10px;"><span style="color:var(--us-color)">${game.scoreUs}</span> - <span style="color:var(--them-color)">${game.scoreThem}</span></div><div><strong>التاريخ:</strong> ${game.date} | <strong>الوقت:</strong> ${game.time}</div></div>
+      <div class="details-box"><h4>اللاعبين 👥</h4><div><strong style="color:var(--us-color)">فريق لنا:</strong> ${game.playersUs}</div><div><strong style="color:var(--them-color)">فريق لهم:</strong> ${game.playersThem}</div></div>
+      <div class="details-box"><h4>تفاصيل الجولات 📝</h4><div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:bold;"><span>لهم</span><span>الرقم</span><span>لنا</span></div>${roundsHtml}</div>
+      <div class="details-box"><h4>الملاحظات 📌</h4><div>${game.note}</div></div>
     `;
-
     document.getElementById('archive-details-content').innerHTML = contentHtml;
-    toggleModal('archive-modal'); // إغلاق القائمة
-    toggleModal('archive-details-modal'); // فتح التفاصيل
+    toggleModal('archive-modal');
+    toggleModal('archive-details-modal');
   }
 
-  // دالة: مشاركة الصكة (نسخ النص)
   function shareArchive() {
     const gameId = parseInt(document.getElementById('current-archive-id').value);
     const game = savedArchive.find(g => g.id === gameId);
     if(!game) return;
 
-    let textToShare = `*صكة بلوت 🃏*\n`;
-    textToShare += `التاريخ: ${game.date} - ${game.time}\n\n`;
-    textToShare += `*النتيجة النهائية 🏆*\n`;
-    textToShare += `لنا (${game.playersUs}): ${game.scoreUs}\n`;
-    textToShare += `لهم (${game.playersThem}): ${game.scoreThem}\n\n`;
-    textToShare += `*تفصيل الجولات 📝*\n`;
-    
-    game.rounds.forEach(r => {
-      textToShare += `جولة ${r.round} ◀️ لنا: ${r.us} | لهم: ${r.them}\n`;
-    });
+    let textToShare = `*صكة بلوت 🃏*\nالتاريخ: ${game.date} - ${game.time}\n\n*النتيجة النهائية 🏆*\nلنا (${game.playersUs}): ${game.scoreUs}\nلهم (${game.playersThem}): ${game.scoreThem}\n\n*تفصيل الجولات 📝*\n`;
+    game.rounds.forEach(r => { textToShare += `جولة ${r.round} ◀️ لنا: ${r.us} | لهم: ${r.them}\n`; });
+    if(game.note && game.note !== 'لا يوجد ملاحظات') { textToShare += `\n*الملاحظات 📌*\n${game.note}\n`; }
 
-    if(game.note && game.note !== 'لا يوجد ملاحظات') {
-      textToShare += `\n*الملاحظات 📌*\n${game.note}\n`;
-    }
-
-    // أمر نسخ النص إلى الحافظة
     navigator.clipboard.writeText(textToShare).then(() => {
       alert('تم نسخ تفاصيل الصكة بنجاح، يمكنك لصقها وإرسالها! 📤');
-    }).catch(err => {
-      alert('حدث خطأ أثناء النسخ، جهازك قد لا يدعم هذه الميزة.');
-    });
+    }).catch(err => { alert('حدث خطأ أثناء النسخ.'); });
   }
 
-  // دالة: حذف الصكة من الأرشيف
   function deleteArchive() {
     if(!confirm('هل أنت متأكد من حذف هذه الصكة نهائياً؟ 🗑️')) return;
-    
     const gameId = parseInt(document.getElementById('current-archive-id').value);
     savedArchive = savedArchive.filter(g => g.id !== gameId);
     localStorage.setItem('baloot_archive', JSON.stringify(savedArchive));
-    
-    toggleModal('archive-details-modal'); // إغلاق التفاصيل
-    openArchiveModal(); // إعادة فتح القائمة المحدثة
+    toggleModal('archive-details-modal');
+    openArchiveModal(); 
   }
 
-  // === نهاية قسم: أكواد الأرشيف ===
-
-  // === بداية دالة: تجهيز قائمة أصوات القارئ الناطق (نسخة محسنة) ===
+  // === دالة تجهيز قائمة الأصوات ===
   function populateVoices() {
-    // جلب الأصوات المتاحة في النظام
-    let availableVoices = window.speechSynthesis.getVoices();
-    
-    // فلترة الأصوات العربية فقط
-    voices = availableVoices.filter(v => v.lang.includes('ar'));
-
     const s = document.getElementById('voice-select');
+    if (!s) return; // حماية للعنصر
     
+    let availableVoices = window.speechSynthesis.getVoices();
+    voices = availableVoices.filter(v => v.lang.toLowerCase().includes('ar'));
+
     if (voices.length > 0) {
-      s.innerHTML = voices.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
-      
-      // استعادة الصوت المحفوظ سابقاً إذا وجد
       const savedVoice = localStorage.getItem('baloot_voice');
-      if (savedVoice) {
-        s.value = savedVoice;
-      }
+      s.innerHTML = voices.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+      if (savedVoice) { s.value = savedVoice; }
     } else {
-      // في حال لم تتوفر أصوات عربية بعد، نضع رسالة تنبيه داخل القائمة
-      s.innerHTML = '<option value="">لا توجد أصوات عربية متاحة</option>';
+      s.innerHTML = '<option value="">اضغط هنا لتحديث الأصوات</option>';
     }
   }
 
-  // التأكد من عمل الدالة عند تغير حالة المحرك الصوتي في المتصفح
-  if ('speechSynthesis' in window) {
-    window.speechSynthesis.onvoiceschanged = populateVoices;
-    // محاولة التشغيل فوراً أيضاً
-    populateVoices();
-  }
-
-
-  // === بداية دالة: حفظ صوت القارئ المختار ===
   function saveVoice() { 
     localStorage.setItem('baloot_voice', document.getElementById('voice-select').value); 
   }
 
-    // === بداية دالة: نطق النتيجة بالصوت ===
   function speakScore() {
-    window.speechSynthesis.cancel(); // إيقاف أي صوت سابق أولاً لضمان عدم التداخل
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel(); 
     
-    // إعطاء محرك أندرويد 50 جزء من الثانية قبل إرسال الأمر الجديد لمنع التعليق
     setTimeout(() => {
       const text = `لنا ${totalUs}، لهم ${totalThem}`;
       const u = new SpeechSynthesisUtterance(text);
-      const v = voices.find(v => v.name === document.getElementById('voice-select').value);
-      if(v) u.voice = v; 
+      
+      const s = document.getElementById('voice-select');
+      if (s && s.value) {
+        const v = voices.find(v => v.name === s.value);
+        if(v) u.voice = v; 
+      }
       u.lang = 'ar-SA';
       window.speechSynthesis.speak(u);
     }, 50);
   }
 
-   // === بداية قسم: الانتقال التلقائي الذكي بين حقول الإدخال ===
+  // === الانتقال التلقائي الذكي بين حقول الإدخال ===
   document.getElementById('input-us').addEventListener('input', function() {
     if(this.value.length === 2) {
-      if(document.getElementById('input-them').value === '') {
-        document.getElementById('input-them').focus(); // الانتقال للحقل الثاني إذا كان فارغاً
-      } else {
-        register(); // تسجيل الجولة إذا كان الحقلان ممتلئين
-      }
+      if(document.getElementById('input-them').value === '') { document.getElementById('input-them').focus(); } 
+      else { register(); }
     }
   });
 
   document.getElementById('input-them').addEventListener('input', function() {
     if(this.value.length === 2) {
-      if(document.getElementById('input-us').value === '') {
-        document.getElementById('input-us').focus(); // الانتقال للحقل الثاني إذا كان فارغاً
-      } else {
-        register(); // تسجيل الجولة إذا كان الحقلان ممتلئين
-      }
+      if(document.getElementById('input-us').value === '') { document.getElementById('input-us').focus(); } 
+      else { register(); }
     }
   });
 
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
+  if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
   
 </script>
 </body>
