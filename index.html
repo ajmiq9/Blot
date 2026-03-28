@@ -325,8 +325,8 @@
     <div class="modal-content">
       <div class="settings-header"><span id="edit-title">تعديل</span><button class="close-btn" onclick="toggleModal('edit-modal')">×</button></div>
       <div class="input-row">
-        <div class="input-group us"><label>لنا</label><input type="number" id="edit-us" inputmode="numeric"></div>
-        <div class="input-group them"><label>لهم</label><input type="number" id="edit-them" inputmode="numeric"></div>
+        <div class="input-group us"><label>لنا</label><input type="number" id="edit-us" inputmode="numeric" onfocus="this.select()"></div>
+        <div class="input-group them"><label>لهم</label><input type="number" id="edit-them" inputmode="numeric" onfocus="this.select()"></div>
       </div>
       <input type="hidden" id="edit-round-id">
       <button class="btn-save-edit" onclick="saveEdit()">حفظ التعديل ✓</button>
@@ -765,14 +765,14 @@
   document.getElementById('input-us').addEventListener('input', function() {
     if(this.value.length === 2) {
       if(document.getElementById('input-them').value === '') { document.getElementById('input-them').focus(); } 
-      else { register(); }
+      // التعديل هنا: تمت إزالة التسجيل التلقائي
     }
   });
 
   document.getElementById('input-them').addEventListener('input', function() {
     if(this.value.length === 2) {
       if(document.getElementById('input-us').value === '') { document.getElementById('input-us').focus(); } 
-      else { register(); }
+      // التعديل هنا: تمت إزالة التسجيل التلقائي
     }
   });
 
