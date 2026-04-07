@@ -521,7 +521,7 @@
     inputThemElement.blur();
 
     updateUI();
-      if (totalUs < 152 && totalThem < 152) {
+    if (totalUs < 152 && totalThem < 152) {
       if ((us + them) >= 16 && (us === 0 || them === 0)) {
         const audioKeys = Object.keys(zeroAudioFiles);
         const randomKey = audioKeys[Math.floor(Math.random() * audioKeys.length)];
@@ -529,11 +529,22 @@
         
         window.speechSynthesis.cancel();
         customAudio.currentTime = 0; 
-        customAudio.play();
         
-        customAudio.onended = function() {
-          speakScore();
-        };
+        // محاولة التشغيل ومراقبة الأخطاء
+        let playPromise = customAudio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // إذا اشتغل الصوت بنجاح، انتظر حتى ينتهي ثم انطق النشرة
+            customAudio.onended = function() {
+              speakScore();
+            };
+          }).catch(error => {
+            // إذا فشل المتصفح، أظهر الخطأ على الشاشة وتجاوز المشكلة
+            alert("اسم الملف: " + randomKey + "\nنوع الخطأ: " + error.name + "\nالتفاصيل: " + error.message);
+            speakScore(); // نطق النشرة حتى لو فشل الصوت
+          });
+        }
       } else {
         speakScore();
       }
@@ -595,21 +606,29 @@
     updateUI();
     toggleModal('edit-modal');
     if (totalUs < 152 && totalThem < 152) {
-      const currentUs = parseInt(document.getElementById('edit-us').value) || 0;
-      const currentThem = parseInt(document.getElementById('edit-them').value) || 0;
-
-      if ((currentUs + currentThem) >= 16 && (currentUs === 0 || currentThem === 0)) {
+      if ((us + them) >= 16 && (us === 0 || them === 0)) {
         const audioKeys = Object.keys(zeroAudioFiles);
         const randomKey = audioKeys[Math.floor(Math.random() * audioKeys.length)];
         let customAudio = zeroAudioFiles[randomKey];
         
         window.speechSynthesis.cancel();
         customAudio.currentTime = 0; 
-        customAudio.play();
         
-        customAudio.onended = function() {
-          speakScore();
-        };
+        // محاولة التشغيل ومراقبة الأخطاء
+        let playPromise = customAudio.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // إذا اشتغل الصوت بنجاح، انتظر حتى ينتهي ثم انطق النشرة
+            customAudio.onended = function() {
+              speakScore();
+            };
+          }).catch(error => {
+            // إذا فشل المتصفح، أظهر الخطأ على الشاشة وتجاوز المشكلة
+            alert("اسم الملف: " + randomKey + "\nنوع الخطأ: " + error.name + "\nالتفاصيل: " + error.message);
+            speakScore(); // نطق النشرة حتى لو فشل الصوت
+          });
+        }
       } else {
         speakScore();
       }
