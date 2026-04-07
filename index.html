@@ -409,18 +409,6 @@
     'https://www.myinstants.com/media/sounds/ankara-messi.mp3'                    
   ];
   let currentAudio = null; 
-  
-  // ======== تحميل الصوتيات ========
-  const zeroAudioFiles = {
-    'mafeh': new Audio('mafeh_mstwa.mp3'),
-    'klk': new Audio('Klk.mp3'),
-    'ahd': new Audio('Feh_a7d.mp3'),
-    'naim': new Audio('Mstwak_nem.mp3')
-  };
-
-  Object.values(zeroAudioFiles).forEach(audio => {
-    audio.preload = 'auto';
-  });
   // ==========================================
   // إعدادات البداية والتحميل
   // ==========================================
@@ -521,31 +509,25 @@
     inputThemElement.blur();
 
     updateUI();
+    // التأكد أنها ليست الجولة الأخيرة
     if (totalUs < 152 && totalThem < 152) {
+      // التأكد أن مجموع النقاط 16 أو أكثر، وأن أحد الفريقين نتيجته صفر
       if ((us + them) >= 16 && (us === 0 || them === 0)) {
-        const audioKeys = Object.keys(zeroAudioFiles);
-        const randomKey = audioKeys[Math.floor(Math.random() * audioKeys.length)];
-        let customAudio = zeroAudioFiles[randomKey];
+        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
+        const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
         
+        // إيقاف أي قراءة سابقة معلقة احتياطياً
         window.speechSynthesis.cancel();
-        customAudio.currentTime = 0; 
         
-        // محاولة التشغيل ومراقبة الأخطاء
-        let playPromise = customAudio.play();
+        let customAudio = new Audio(randomAudio);
+        customAudio.play();
         
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            // إذا اشتغل الصوت بنجاح، انتظر حتى ينتهي ثم انطق النشرة
-            customAudio.onended = function() {
-              speakScore();
-            };
-          }).catch(error => {
-            // إذا فشل المتصفح، أظهر الخطأ على الشاشة وتجاوز المشكلة
-            alert("اسم الملف: " + randomKey + "\nنوع الخطأ: " + error.name + "\nالتفاصيل: " + error.message);
-            speakScore(); // نطق النشرة حتى لو فشل الصوت
-          });
-        }
+        // تشغيل الناطق الآلي مباشرة بعد انتهاء المقطع الصوتي
+        customAudio.onended = function() {
+          speakScore();
+        };
       } else {
+        // إذا كانت جولة عادية (لا يوجد صفر)، اقرأ النتيجة مباشرة
         speakScore();
       }
     }
@@ -606,29 +588,20 @@
     updateUI();
     toggleModal('edit-modal');
     if (totalUs < 152 && totalThem < 152) {
-      if ((us + them) >= 16 && (us === 0 || them === 0)) {
-        const audioKeys = Object.keys(zeroAudioFiles);
-        const randomKey = audioKeys[Math.floor(Math.random() * audioKeys.length)];
-        let customAudio = zeroAudioFiles[randomKey];
+      const currentUs = parseInt(document.getElementById('edit-us').value) || 0;
+      const currentThem = parseInt(document.getElementById('edit-them').value) || 0;
+
+      if ((currentUs + currentThem) >= 16 && (currentUs === 0 || currentThem === 0)) {
+        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
+        const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
         
         window.speechSynthesis.cancel();
-        customAudio.currentTime = 0; 
+        let customAudio = new Audio(randomAudio);
+        customAudio.play();
         
-        // محاولة التشغيل ومراقبة الأخطاء
-        let playPromise = customAudio.play();
-        
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            // إذا اشتغل الصوت بنجاح، انتظر حتى ينتهي ثم انطق النشرة
-            customAudio.onended = function() {
-              speakScore();
-            };
-          }).catch(error => {
-            // إذا فشل المتصفح، أظهر الخطأ على الشاشة وتجاوز المشكلة
-            alert("اسم الملف: " + randomKey + "\nنوع الخطأ: " + error.name + "\nالتفاصيل: " + error.message);
-            speakScore(); // نطق النشرة حتى لو فشل الصوت
-          });
-        }
+        customAudio.onended = function() {
+          speakScore();
+        };
       } else {
         speakScore();
       }
