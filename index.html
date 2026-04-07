@@ -514,7 +514,7 @@
     if (totalUs < 152 && totalThem < 152) {
       // التأكد أن مجموع النقاط 16 أو أكثر، وأن أحد الفريقين نتيجته صفر
       if ((us + them) >= 16 && (us === 0 || them === 0)) {
-        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk_8reb.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
+        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk_qreb.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
         const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
         
         // إيقاف أي قراءة سابقة معلقة احتياطياً
@@ -593,7 +593,7 @@
       const currentThem = parseInt(document.getElementById('edit-them').value) || 0;
 
       if ((currentUs + currentThem) >= 16 && (currentUs === 0 || currentThem === 0)) {
-        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk_8reb.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
+        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk_qreb.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
         const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
         
         window.speechSynthesis.cancel();
