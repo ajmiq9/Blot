@@ -429,7 +429,7 @@
       }
     }
 
-    setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 1500);
+    setTimeout(() => document.getElementById('splash-screen').classList.add('hidden'), 3000);
   };
 
   function toggleModal(id) {
@@ -510,7 +510,28 @@
     inputThemElement.blur();
 
     updateUI();
-    if (totalUs < 152 && totalThem < 152) { speakScore(); }
+    // التأكد أنها ليست الجولة الأخيرة
+    if (totalUs < 152 && totalThem < 152) {
+      // التأكد أن مجموع النقاط 16 أو أكثر، وأن أحد الفريقين نتيجته صفر
+      if ((us + them) >= 16 && (us === 0 || them === 0)) {
+        const zeroSounds = ['mafeh_mstwa.mp3', '5lk_8reb.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
+        const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
+        
+        // إيقاف أي قراءة سابقة معلقة احتياطياً
+        window.speechSynthesis.cancel();
+        
+        let customAudio = new Audio(randomAudio);
+        customAudio.play();
+        
+        // تشغيل الناطق الآلي مباشرة بعد انتهاء المقطع الصوتي
+        customAudio.onended = function() {
+          speakScore();
+        };
+      } else {
+        // إذا كانت جولة عادية (لا يوجد صفر)، اقرأ النتيجة مباشرة
+        speakScore();
+      }
+    }
     checkWin();
   }
 
@@ -567,7 +588,25 @@
     totalThem = history.reduce((s, c) => s + c.them, 0);
     updateUI();
     toggleModal('edit-modal');
-    if (totalUs < 152 && totalThem < 152) { speakScore(); }
+    if (totalUs < 152 && totalThem < 152) {
+      const currentUs = parseInt(document.getElementById('edit-us').value) || 0;
+      const currentThem = parseInt(document.getElementById('edit-them').value) || 0;
+
+      if ((currentUs + currentThem) >= 16 && (currentUs === 0 || currentThem === 0)) {
+        const zeroSounds = ['mafeh_mstwa.mp3', '5lk_8reb.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
+        const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
+        
+        window.speechSynthesis.cancel();
+        let customAudio = new Audio(randomAudio);
+        customAudio.play();
+        
+        customAudio.onended = function() {
+          speakScore();
+        };
+      } else {
+        speakScore();
+      }
+    }
     checkWin();
   }
 
