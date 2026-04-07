@@ -8,10 +8,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 <style>
   /* =========================================
-     المتغيرات والألوان (ثيم داكن وفاتح مستقل)
+     المتغيرات والألوان
      ========================================= */
   :root {
-    /* الألوان الأساسية للمظهر الداكن */
     --bg: #0a0a0f;
     --surface: #12121a;
     --surface2: #1a1a28;
@@ -24,34 +23,25 @@
     --radius: 20px;
     --radius-sm: 12px;
 
-    /* --- لوحات الألوان (المظهر الداكن - نيون ساطع) --- */
     --p0-us-dark: #4fffb0; --p0-them-dark: #ff6b8a;
     --p1-us-dark: #4facfe; --p1-them-dark: #ff9a44;
     --p2-us-dark: #f5c842; --p2-them-dark: #b366ff;
     --p3-us-dark: #a8ff78; --p3-them-dark: #ff4747;
 
-    /* --- لوحات الألوان (المظهر الفاتح - درجات هادئة ومريحة للعين) --- */
-    /* 0: سماوي هادئ / أحمر ناعم */
     --p0-us-light: #0096c7; --p0-them-light: #e63946;
-    /* 1: تركواز (أخضر مزرق) / برتقالي هادئ */
     --p1-us-light: #2a9d8f; --p1-them-light: #e76f51;
-    /* 2: أزرق نيلي / بنفسجي هادئ */
     --p2-us-light: #4361ee; --p2-them-light: #b5179e;
-    /* 3: أخضر غابات / أحمر قرمزي */
     --p3-us-light: #2d6a4f; --p3-them-light: #d90429;
 
-    /* إعداد الألوان الافتراضية */
     --p0-us: var(--p0-us-dark); --p0-them: var(--p0-them-dark);
     --p1-us: var(--p1-us-dark); --p1-them: var(--p1-them-dark);
     --p2-us: var(--p2-us-dark); --p2-them: var(--p2-them-dark);
     --p3-us: var(--p3-us-dark); --p3-them: var(--p3-them-dark);
 
-    /* تأثيرات التوهج للداكن فقط */
     --us-glow: rgba(79, 255, 176, 0.25);
     --them-glow: rgba(255, 107, 138, 0.25);
   }
 
-  /* تبديل المتغيرات عند تفعيل المظهر الفاتح */
   body.light-theme {
     --bg: #f4f4f9;
     --surface: #ffffff;
@@ -67,46 +57,39 @@
     --p3-us: var(--p3-us-light); --p3-them: var(--p3-them-light);
   }
 
-  /* ربط اللوحة المختارة بالألوان الرئيسية للتطبيق */
   body[data-palette="0"] { --us-color: var(--p0-us); --them-color: var(--p0-them); --us-glow: rgba(79,255,176,0.25); --them-glow: rgba(255,107,138,0.25); }
   body[data-palette="1"] { --us-color: var(--p1-us); --them-color: var(--p1-them); --us-glow: rgba(79,172,254,0.25); --them-glow: rgba(255,154,68,0.25); }
   body[data-palette="2"] { --us-color: var(--p2-us); --them-color: var(--p2-them); --us-glow: rgba(245,200,66,0.25); --them-glow: rgba(179,102,255,0.25); }
   body[data-palette="3"] { --us-color: var(--p3-us); --them-color: var(--p3-them); --us-glow: rgba(168,255,120,0.25); --them-glow: rgba(255,71,71,0.25); }
 
   /* =========================================
-     التنسيقات العامة والأساسيات
+     التنسيقات العامة
      ========================================= */
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  
-  body {
-    font-family: 'Tajawal', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-    -webkit-tap-highlight-color: transparent;
-    transition: background 0.3s, color 0.3s;
-  }
-
+  body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; position: relative; -webkit-tap-highlight-color: transparent; transition: background 0.3s, color 0.3s; }
   .app { max-width: 480px; margin: 0 auto; padding: 15px 16px 40px; position: relative; z-index: 1; }
 
   /* =========================================
-     لوحة النتائج العلوية
+     لوحة النتائج
      ========================================= */
   .scoreboard { display: grid; grid-template-columns: 1fr auto 1fr; gap: 15px; align-items: center; margin-bottom: 24px; margin-top: 20px; }
   .score-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 10px; text-align: center; position: relative; overflow: hidden; }
   .score-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: var(--us-color); }
   .score-card.them::before { background: var(--them-color); }
-  .score-label { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; color: var(--us-color); }
+  
+  .score-label { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; color: var(--us-color); display: flex; align-items: center; justify-content: center; gap: 5px; }
   .score-card.them .score-label { color: var(--them-color); }
+  
+  /* تنسيق شارة الستريك الجديدة */
+  .streak-badge { font-size: 1.1rem; color: var(--text-muted); background: var(--surface2); padding: 2px 8px; border-radius: 8px; border: 1px solid var(--border); }
+  body:not(.light-theme) .score-card.us .streak-badge { border-color: rgba(79, 255, 176, 0.3); }
+  body:not(.light-theme) .score-card.them .streak-badge { border-color: rgba(255, 107, 138, 0.3); }
   
   .score-value { font-size: 3.5rem; font-weight: 900; line-height: 1; }
   body:not(.light-theme) .score-card.us .score-value { color: #fff; text-shadow: 0 0 10px var(--us-glow); }
   body:not(.light-theme) .score-card.them .score-value { color: #fff; text-shadow: 0 0 10px var(--them-glow); }
   body.light-theme .score-card.us .score-value { color: var(--us-color); }
   body.light-theme .score-card.them .score-value { color: var(--them-color); }
-  
   .score-value.bump { transform: scale(1.2); transition: 0.3s; }
 
   .vs-divider { display: flex; flex-direction: column; align-items: center; gap: 12px; }
@@ -115,7 +98,7 @@
   .btn-speaker { background: var(--surface2); border: 1px solid var(--border); border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; color: var(--text); }
 
   /* =========================================
-     حقول الإدخال والأزرار
+     حقول الإدخال
      ========================================= */
   .input-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
   .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
@@ -131,7 +114,7 @@
   .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* =========================================
-     سجل الجولات (الأرشيف اللحظي)
+     سجل الجولات
      ========================================= */
   .history-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; padding-top: 10px; }
   .history-list { list-style: none; max-height: 250px; overflow-y: auto; }
@@ -142,7 +125,7 @@
   .empty-state { padding: 30px; text-align: center; color: var(--text-dim); }
 
   /* =========================================
-     النوافذ المنبثقة (Modals)
+     النوافذ المنبثقة
      ========================================= */
   .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
   .modal-content { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 90%; max-width: 380px; max-height: 90vh; overflow-y: auto; }
@@ -157,36 +140,14 @@
   body:not(.light-theme) .btn-save-edit { background: var(--us-color); color: #000; }
   body.light-theme .btn-save-edit { background: var(--us-color); color: #fff; }
 
-  /* =========================================
-     أزرار اختيار الألوان (تم حل مشكلة الزوايا)
-     ========================================= */
   .color-themes { display: flex; gap: 15px; justify-content: center; margin-top: 10px; }
-  .color-btn { 
-    width: 44px; height: 44px; 
-    border-radius: 50%; 
-    border: none; /* تمت إزالة الحدود لمنع تسرب الألوان */
-    cursor: pointer; 
-    transition: 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    overflow: hidden; /* هذا السطر يقص التدرج اللوني ليكون دائرياً 100% */
-    padding: 0;
-  }
-  
-  /* تقنية الحلقة الخارجية لتوضيح الاختيار بدون التأثير على شكل الدائرة */
-  .color-btn.active { 
-    transform: scale(1.15); 
-    box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--text); 
-  }
-  
-  /* التدرجات اللونية نظيفة وحادة */
+  .color-btn { width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); overflow: hidden; padding: 0; }
+  .color-btn.active { transform: scale(1.15); box-shadow: 0 0 0 3px var(--surface), 0 0 0 5px var(--text); }
   .color-btn[data-idx="0"] { background: linear-gradient(135deg, var(--p0-us) 0%, var(--p0-us) 50%, var(--p0-them) 50%, var(--p0-them) 100%); }
   .color-btn[data-idx="1"] { background: linear-gradient(135deg, var(--p1-us) 0%, var(--p1-us) 50%, var(--p1-them) 50%, var(--p1-them) 100%); }
   .color-btn[data-idx="2"] { background: linear-gradient(135deg, var(--p2-us) 0%, var(--p2-us) 50%, var(--p2-them) 50%, var(--p2-them) 100%); }
   .color-btn[data-idx="3"] { background: linear-gradient(135deg, var(--p3-us) 0%, var(--p3-us) 50%, var(--p3-them) 50%, var(--p3-them) 100%); }
 
-  /* =========================================
-     نافذة الفوز والأرشيف
-     ========================================= */
   .winner-content { text-align: center; border: 2px solid; }
   .winner-content.us-win { border-color: var(--us-color); box-shadow: 0 0 20px var(--us-glow); }
   .winner-content.them-win { border-color: var(--them-color); box-shadow: 0 0 20px var(--them-glow); }
@@ -212,9 +173,6 @@
   .btn-share { background: #1da1f2; color: #fff; }
   .btn-delete { background: var(--danger); color: #fff; }
 
-  /* =========================================
-     شاشة التحميل (Splash)
-     ========================================= */
   .splash-screen { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; transition: 0.5s; text-align: center; flex-direction: column; }
   .splash-screen.hidden { opacity: 0; visibility: hidden; }
   .spinner { width: 45px; height: 45px; border: 4px solid var(--surface2); border-top-color: var(--us-color); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
@@ -228,11 +186,9 @@
 
 <div id="splash-screen" class="splash-screen">
   <div class="splash-content" style="display: flex; flex-direction: column; align-items: center;">
-    
     <img src="https://raw.githubusercontent.com/ajmiq9/Blot/e8fc9203c81d6ca284735d23438b12bf6c91241a/icon-192.png" 
          alt="App Icon" 
          style="width: 500px; height: 500px; border-radius: 40px; margin-top: -250px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); object-fit: cover;">
-    
     <h1 class="splash-title" style="margin-bottom:20px">حاسبة البلوت</h1>
     <div class="spinner"></div>
     <p style="font-weight:700; color:var(--text-dim)">تطوير: سلطان</p>
@@ -243,7 +199,7 @@
 
   <div class="scoreboard">
     <div class="score-card us">
-      <div class="score-label">لنا</div>
+      <div class="score-label">لنا <span id="streak-us" class="streak-badge">0</span></div>
       <div class="score-value" id="score-us">0</div>
     </div>
     <div class="vs-divider">
@@ -252,7 +208,7 @@
       <button class="btn-speaker" onclick="speakScore()">🔊</button>
     </div>
     <div class="score-card them">
-      <div class="score-label">لهم</div>
+      <div class="score-label">لهم <span id="streak-them" class="streak-badge">0</span></div>
       <div class="score-value" id="score-them">0</div>
     </div>
   </div>
@@ -269,7 +225,7 @@
       </div>
     </div>
     <div class="action-row">
-      <button class="btn-action" id="btn-reset" onclick="resetGame()" disabled>صكة<br>جديدة</button>
+      <button class="btn-action" id="btn-reset" onclick="openResetModal()" disabled>صكة<br>جديدة</button>
       <button class="btn-register" onclick="register()">تسجيل</button>
       <button class="btn-action" id="btn-undo" onclick="undo()" disabled>تراجع<br><span style="font-size: 1.4rem; margin-top: 2px;">⟲</span></button>
     </div>
@@ -344,9 +300,21 @@
       <div class="winner-title" id="winner-title">فوز!</div>
       <div class="winner-score" id="winner-score">0 - 0</div>
       
-      <button class="btn-new-game" onclick="resetAfterWin()">صكة جديدة 🃏</button>
+      <button class="btn-new-game" onclick="openResetModal()">صكة جديدة 🃏</button>
       <button class="btn-toggle-theme" style="background:var(--them-color); color:#fff; text-shadow:1px 1px 2px rgba(0,0,0,0.5);" onclick="openSaveGameModal()">حفظ الصكة 💾</button>
       <button class="btn-back" onclick="toggleModal('winner-modal')">العودة للنشرة</button>
+    </div>
+  </div>
+
+  <div class="modal" id="reset-modal">
+    <div class="modal-content" style="text-align: center;">
+      <h3 style="margin-bottom: 15px; color: var(--text);">تأكيد صكة جديدة</h3>
+      <p style="margin-bottom: 20px; color: var(--text-dim); font-size: 0.95rem; line-height: 1.5;">هل أنت متأكد من بدء صكة جديدة؟<br>يرجى تحديد حالة الفريقين:</p>
+      <div style="display: flex; gap: 10px; flex-direction: column;">
+        <button class="btn-save-edit" onclick="executeReset(false)">نفس الفريق (إكمال النتيجة)</button>
+        <button class="btn-toggle-theme" style="background: var(--danger); color: #fff; border:none;" onclick="executeReset(true)">فريق جديد (تصفير النتيجة)</button>
+        <button class="btn-back" onclick="toggleModal('reset-modal')">إلغاء الرجوع</button>
+      </div>
     </div>
   </div>
 
@@ -389,9 +357,7 @@
   <div class="modal" id="archive-details-modal">
     <div class="modal-content">
       <div class="settings-header"><span>تفاصيل الصكة</span><button class="close-btn" onclick="toggleModal('archive-details-modal')">×</button></div>
-      
       <div id="archive-details-content"></div>
-
       <input type="hidden" id="current-archive-id">
       <button class="btn-toggle-theme btn-share" onclick="shareArchive()">مشاركة الصكة 📤</button>
       <button class="btn-toggle-theme btn-delete" onclick="deleteArchive()">حذف الصكة 🗑️</button>
@@ -407,6 +373,11 @@
   let totalUs = 0, totalThem = 0, history = [], round = 0, voices = [], wakeLock = null;
   let savedArchive = []; 
   
+  // متغيرات الستريك والانتصارات
+  let winsUs = 0, winsThem = 0, currentStreakUs = 0, currentStreakThem = 0;
+  let gameEnded = false; // لمنع احتساب الفوز أكثر من مرة لنفس الصكة
+  let prevStreakState = null; // لحفظ حالة الستريك في حال التراجع عن الفوز
+  
   const effectSounds = [
     'https://www.myinstants.com/media/sounds/africa-crying-laugh-commercial.mp3', 
     'https://www.myinstants.com/media/sounds/dnlwd-sdy-mrg-mynkhrft.mp3',         
@@ -414,9 +385,7 @@
     'https://www.myinstants.com/media/sounds/ankara-messi.mp3'                    
   ];
   let currentAudio = null; 
-  // ==========================================
-  // إعدادات البداية والتحميل
-  // ==========================================
+
   window.onload = function() {
     loadData();
     loadSettings();
@@ -474,22 +443,49 @@
 
   function loadSettings() {
     if(localStorage.getItem('baloot_theme') === 'light') document.body.classList.add('light-theme');
-    
     const savedPalette = localStorage.getItem('baloot_palette') || '0';
     setThemePalette(savedPalette, null);
-    
     const savedSound = localStorage.getItem('baloot_sound_effect');
     if(savedSound) { document.getElementById('sound-select').value = savedSound; }
   }
 
-  function saveSoundSetting() {
-    localStorage.setItem('baloot_sound_effect', document.getElementById('sound-select').value);
-  }
+  function saveSoundSetting() { localStorage.setItem('baloot_sound_effect', document.getElementById('sound-select').value); }
 
   async function toggleWakeLock() {
     if (document.getElementById('wake-lock-toggle').checked) {
       try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e){}
     } else if(wakeLock) { wakeLock.release(); wakeLock = null; }
+  }
+
+  // ==========================================
+  // منطق الصوتيات (الجولة الصفرية المباشرة)
+  // ==========================================
+  function handleRoundAudio(u, t) {
+    if (totalUs < 152 && totalThem < 152) {
+      if ((u + t) >= 16 && (u === 0 || t === 0)) {
+        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3']; // تأكد أن الاسم مطابق تماماً في غيت هب
+        const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
+        
+        window.speechSynthesis.cancel();
+        let customAudio = new Audio(randomAudio);
+        
+        // مؤقت حماية لضمان عدم تعليق النشرة بأي حال من الأحوال
+        let fallbackTimer = setTimeout(() => { speakScore(); }, 3500);
+        
+        const triggerSpeak = () => {
+          clearTimeout(fallbackTimer);
+          speakScore();
+          customAudio.onended = null;
+          customAudio.onerror = null;
+        };
+        
+        customAudio.onended = triggerSpeak;
+        customAudio.onerror = triggerSpeak;
+        customAudio.play().catch(triggerSpeak);
+      } else {
+        speakScore();
+      }
+    }
   }
 
   // ==========================================
@@ -514,28 +510,7 @@
     inputThemElement.blur();
 
     updateUI();
-    // التأكد أنها ليست الجولة الأخيرة
-    if (totalUs < 152 && totalThem < 152) {
-      // التأكد أن مجموع النقاط 16 أو أكثر، وأن أحد الفريقين نتيجته صفر
-      if ((us + them) >= 16 && (us === 0 || them === 0)) {
-        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
-        const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
-        
-        // إيقاف أي قراءة سابقة معلقة احتياطياً
-        window.speechSynthesis.cancel();
-        
-        let customAudio = new Audio(randomAudio);
-        customAudio.play();
-        
-        // تشغيل الناطق الآلي مباشرة بعد انتهاء المقطع الصوتي
-        customAudio.onended = function() {
-          speakScore();
-        };
-      } else {
-        // إذا كانت جولة عادية (لا يوجد صفر)، اقرأ النتيجة مباشرة
-        speakScore();
-      }
-    }
+    handleRoundAudio(us, them);
     checkWin();
   }
 
@@ -548,6 +523,18 @@
       const title = document.getElementById('winner-title');
       card.classList.remove('us-win', 'them-win');
       
+      // احتساب الستريك والانتصارات لمرة واحدة في نهاية الصكة
+      if (!gameEnded) {
+        prevStreakState = JSON.stringify({winsUs, winsThem, currentStreakUs, currentStreakThem});
+        gameEnded = true;
+        if (totalUs >= 152 && totalUs > totalThem) {
+          winsUs++; currentStreakUs++; currentStreakThem = 0;
+        } else {
+          winsThem++; currentStreakThem++; currentStreakUs = 0;
+        }
+        updateStreakUI();
+      }
+
       if (totalUs >= 152 && totalUs > totalThem) {
         card.classList.add('us-win'); 
         title.innerText = "مبروك فزتوا! 🎉";
@@ -571,6 +558,16 @@
 
       document.getElementById('winner-score').innerText = `لنا ${totalUs} - لهم ${totalThem}`;
       toggleModal('winner-modal');
+    } else {
+      // في حال تم التراجع عن فوز بالخطأ (undo) ونزلت النتيجة عن 152
+      if (gameEnded) {
+        gameEnded = false;
+        if (prevStreakState) {
+          const s = JSON.parse(prevStreakState);
+          winsUs = s.winsUs; winsThem = s.winsThem; currentStreakUs = s.currentStreakUs; currentStreakThem = s.currentStreakThem;
+          updateStreakUI();
+        }
+      }
     }
   }
 
@@ -586,31 +583,18 @@
   function saveEdit() {
     const rNum = parseInt(document.getElementById('edit-round-id').value);
     const idx = history.findIndex(h => h.round === rNum);
-    history[idx].us = parseInt(document.getElementById('edit-us').value) || 0;
-    history[idx].them = parseInt(document.getElementById('edit-them').value) || 0;
+    
+    const currentUs = parseInt(document.getElementById('edit-us').value) || 0;
+    const currentThem = parseInt(document.getElementById('edit-them').value) || 0;
+
+    history[idx].us = currentUs;
+    history[idx].them = currentThem;
     totalUs = history.reduce((s, c) => s + c.us, 0);
     totalThem = history.reduce((s, c) => s + c.them, 0);
     updateUI();
     toggleModal('edit-modal');
-    if (totalUs < 152 && totalThem < 152) {
-      const currentUs = parseInt(document.getElementById('edit-us').value) || 0;
-      const currentThem = parseInt(document.getElementById('edit-them').value) || 0;
-
-      if ((currentUs + currentThem) >= 16 && (currentUs === 0 || currentThem === 0)) {
-        const zeroSounds = ['mafeh_mstwa.mp3', 'Klk.mp3', 'Feh_a7d.mp3', 'Mstwak_nem.mp3'];
-        const randomAudio = zeroSounds[Math.floor(Math.random() * zeroSounds.length)];
-        
-        window.speechSynthesis.cancel();
-        let customAudio = new Audio(randomAudio);
-        customAudio.play();
-        
-        customAudio.onended = function() {
-          speakScore();
-        };
-      } else {
-        speakScore();
-      }
-    }
+    
+    handleRoundAudio(currentUs, currentThem);
     checkWin();
   }
 
@@ -621,18 +605,41 @@
     totalUs = history.reduce((s, c) => s + c.us, 0);
     totalThem = history.reduce((s, c) => s + c.them, 0);
     updateUI();
+    checkWin(); // للتحقق إذا نزلنا تحت 152 لتعديل الستريك
   }
 
-  function resetGame() {
-    if(!confirm("بدء صكة جديدة؟")) return;
-    resetAfterWin();
+  // دوال الستريك وصكة جديدة
+  function openResetModal() {
+    document.getElementById('reset-modal').style.display = 'flex';
   }
 
-  function resetAfterWin() {
+  function executeReset(isNewTeam) {
+    if (isNewTeam) {
+      winsUs = 0; winsThem = 0;
+      currentStreakUs = 0; currentStreakThem = 0;
+      updateStreakUI();
+    }
+    
     if(currentAudio) { currentAudio.pause(); currentAudio.currentTime = 0; }
-    totalUs = 0; totalThem = 0; history = []; round = 0;
+    totalUs = 0; totalThem = 0; history = []; round = 0; gameEnded = false;
     updateUI();
-    if(document.getElementById('winner-modal').style.display === 'flex') { toggleModal('winner-modal'); }
+    
+    document.getElementById('reset-modal').style.display = 'none';
+    document.getElementById('winner-modal').style.display = 'none';
+  }
+
+  function updateStreakUI() {
+    let emojiUs = '', emojiThem = '';
+    
+    if (currentStreakUs === 2) { emojiUs = '🔥'; emojiThem = '💤'; }
+    else if (currentStreakUs >= 3) { emojiUs = '🚀'; emojiThem = '🚑'; }
+    else if (currentStreakThem === 2) { emojiThem = '🔥'; emojiUs = '💤'; }
+    else if (currentStreakThem >= 3) { emojiThem = '🚀'; emojiUs = '🚑'; }
+    
+    document.getElementById('streak-us').innerText = winsUs + ' ' + emojiUs;
+    document.getElementById('streak-them').innerText = winsThem + ' ' + emojiThem;
+    
+    localStorage.setItem('baloot_streak', JSON.stringify({winsUs, winsThem, currentStreakUs, currentStreakThem}));
   }
 
   function updateUI() {
@@ -642,8 +649,10 @@
     document.getElementById('score-them').classList.add('bump');
     setTimeout(() => { document.getElementById('score-us').classList.remove('bump'); document.getElementById('score-them').classList.remove('bump'); }, 300);
     
-    document.getElementById('btn-undo').disabled = history.length === 0;
-    document.getElementById('btn-reset').disabled = history.length === 0;
+    const noHistory = history.length === 0;
+    document.getElementById('btn-undo').disabled = noHistory;
+    // يمكن تصفير الصكة إذا كان هناك ستريك حتى لو لم تبدأ الجولة
+    document.getElementById('btn-reset').disabled = noHistory && winsUs === 0 && winsThem === 0;
     
     const list = document.getElementById('history-list');
     if(history.length === 0) { list.innerHTML = '<li class="empty-state">لم يتم تسجيل أبناط بعد</li>'; }
@@ -655,12 +664,22 @@
           <div class="history-score them">+${h.them}</div>
         </li>`).join('');
     }
-    localStorage.setItem('baloot_data', JSON.stringify({totalUs, totalThem, history, round}));
+    localStorage.setItem('baloot_data', JSON.stringify({totalUs, totalThem, history, round, gameEnded, prevStreakState}));
   }
 
   function loadData() {
     const d = JSON.parse(localStorage.getItem('baloot_data') || '{}');
-    if(d.history) { totalUs = d.totalUs; totalThem = d.totalThem; history = d.history; round = d.round; updateUI(); }
+    if(d.history) { 
+      totalUs = d.totalUs; totalThem = d.totalThem; history = d.history; round = d.round; 
+      gameEnded = d.gameEnded || false; prevStreakState = d.prevStreakState || null;
+    }
+    
+    const s = JSON.parse(localStorage.getItem('baloot_streak') || '{}');
+    winsUs = s.winsUs || 0; winsThem = s.winsThem || 0;
+    currentStreakUs = s.currentStreakUs || 0; currentStreakThem = s.currentStreakThem || 0;
+    
+    updateUI();
+    updateStreakUI();
   }
 
   // ==========================================
@@ -698,7 +717,7 @@
     localStorage.setItem('baloot_archive', JSON.stringify(savedArchive));
     
     toggleModal('save-game-modal');
-    resetAfterWin();
+    openResetModal(); // فتح نافذة تأكيد الفريق بعد الحفظ للبدء بصكة جديدة
     alert('تم حفظ الصكة بنجاح في الأرشيف 🗂️');
   }
 
@@ -767,10 +786,8 @@
   function populateVoices() {
     const s = document.getElementById('voice-select');
     if (!s) return; 
-    
     let availableVoices = window.speechSynthesis.getVoices();
     voices = availableVoices.filter(v => v.lang.toLowerCase().startsWith('ar'));
-
     if (voices.length > 0) {
       const savedVoice = localStorage.getItem('baloot_voice');
       s.innerHTML = voices.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
@@ -780,47 +797,30 @@
     }
   }
 
-  function saveVoice() { 
-    localStorage.setItem('baloot_voice', document.getElementById('voice-select').value); 
-  }
+  function saveVoice() { localStorage.setItem('baloot_voice', document.getElementById('voice-select').value); }
 
   function speakScore() {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel(); 
-    
     setTimeout(() => {
       const text = `لنا ${totalUs}، لهم ${totalThem}`;
       const u = new SpeechSynthesisUtterance(text);
-      
       const s = document.getElementById('voice-select');
-      if (s && s.value) {
-        const v = voices.find(v => v.name === s.value);
-        if(v) u.voice = v; 
-      }
+      if (s && s.value) { const v = voices.find(v => v.name === s.value); if(v) u.voice = v; }
       u.lang = 'ar-SA';
       window.speechSynthesis.speak(u);
     }, 50);
   }
 
-  // ==========================================
-  // الانتقال التلقائي الذكي بين حقول الإدخال
-  // ==========================================
   document.getElementById('input-us').addEventListener('input', function() {
-    if(this.value.length === 2) {
-      if(document.getElementById('input-them').value === '') { document.getElementById('input-them').focus(); } 
-      // التعديل هنا: تمت إزالة التسجيل التلقائي
-    }
+    if(this.value.length === 2) { if(document.getElementById('input-them').value === '') { document.getElementById('input-them').focus(); } }
   });
 
   document.getElementById('input-them').addEventListener('input', function() {
-    if(this.value.length === 2) {
-      if(document.getElementById('input-us').value === '') { document.getElementById('input-us').focus(); } 
-      // التعديل هنا: تمت إزالة التسجيل التلقائي
-    }
+    if(this.value.length === 2) { if(document.getElementById('input-us').value === '') { document.getElementById('input-us').focus(); } }
   });
 
   if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
-  
 </script>
 </body>
 </html>
